@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { useState, useEffect, createContext } from "react";
 import clienteAxios from "../config/clienteAxios";
 import { useNavigate } from "react-router-dom";
@@ -9,7 +10,8 @@ const ProyectoProvider = ({ children }) => {
   const [alerta, setAlerta] = useState({});
   const [proyecto, setProyecto] = useState({});
   const [cargando, setCargando] = useState(false);
-  const [modalFormularioTarea, setModalFormularioTarea] = useState(false)
+  const [modalFormularioTarea, setModalFormularioTarea] = useState(false);
+  const [tarea, setTarea] = useState({});
 
   const navigate = useNavigate();
 
@@ -165,6 +167,7 @@ const ProyectoProvider = ({ children }) => {
 
   const handleModalTarea = () => {
     setModalFormularioTarea(!modalFormularioTarea)
+    setTarea({})
   }
 
   const submitTarea = async (tarea) => {
@@ -192,6 +195,11 @@ const ProyectoProvider = ({ children }) => {
     }
   }
 
+  const handleModalEditarTarea = (tarea) => {
+    setTarea(tarea);
+    setModalFormularioTarea(true)
+  }
+
   return (
     <ProyectosContext.Provider
       value={{
@@ -205,7 +213,9 @@ const ProyectoProvider = ({ children }) => {
         eliminarProyecto,
         modalFormularioTarea,
         handleModalTarea,
-        submitTarea
+        submitTarea,
+        handleModalEditarTarea,
+        tarea
       }}
     >
       {children}
