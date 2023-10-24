@@ -1,5 +1,6 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useParams, Link } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import useProyectos from "../hooks/useProyectos";
 import Tarea from "../components/Tarea";
 import ModalFormularioTarea from "../components/ModalFormularioTarea";
@@ -7,8 +8,6 @@ import ModalFormularioTarea from "../components/ModalFormularioTarea";
 const Proyecto = () => {
   const params = useParams();
   const { obtenerProyecto, proyecto, cargando, handleModalTarea } = useProyectos();
-
-  const [modal, setModal] = useState(false);
 
   useEffect(() => {
     obtenerProyecto(params.id);
@@ -81,7 +80,7 @@ const Proyecto = () => {
           <p className="text-center my-5 p-10">No hay tareas en ese proyecto</p>}
       </div>
 
-      <ModalFormularioTarea modal={modal} setModal={setModal} />
+      <ModalFormularioTarea />
     </>
   );
 };
