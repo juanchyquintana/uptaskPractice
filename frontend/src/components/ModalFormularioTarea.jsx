@@ -37,15 +37,15 @@ const ModalFormularioTarea = () => {
 
     setId("");
     setNombre("");
-    setFechaEntrega("");
     setDescripcion("")
+    setFechaEntrega("");
     setPrioridad("");
   }, [tarea])
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if ([nombre, fechaEntrega, descripcion, prioridad].includes("")) {
+    if ([nombre, descripcion, fechaEntrega, prioridad].includes("")) {
       mostrarAlerta({
         msg: "Todos los campos son obligatorios",
         error: true,
@@ -56,8 +56,8 @@ const ModalFormularioTarea = () => {
     await submitTarea({
       id,
       nombre,
-      fechaEntrega,
       descripcion,
+      fechaEntrega,
       prioridad,
       proyecto: params.id,
     });
