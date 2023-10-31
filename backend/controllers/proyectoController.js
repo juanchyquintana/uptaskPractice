@@ -24,7 +24,9 @@ const nuevoProyecto = async (req, res) => {
 
 const obtenerProyecto = async (req, res) => {
   const { id } = req.params;
-  const proyecto = await Proyecto.findById(id).populate("tareas");
+  const proyecto = await Proyecto.findById(id)
+    .populate("tareas")
+    .populate("colaboradores", "nombre email");
 
   if (!proyecto) {
     const error = new Error("No encontrado");
@@ -126,19 +128,19 @@ const agregarColaborador = async (req, res) => {
     return res.status(404).json({ msg: error.message });
   }
 
-  if(proyecto.creador.toString() === usuario._id.toString()) {
+  if (proyecto.creador.toString() === usuario._id.toString()) {
     const error = new Error("El Creador del Proyecto no puede ser Colaborador");
     return res.status(404).json({ msg: error.message });
   }
 
-  if(proyecto.colaboradores.includes(usuario._id)) {
+  if (proyecto.colaboradores.includes(usuario._id)) {
     const error = new Error("El Usuario ya pertenece al proyecto");
     return res.status(404).json({ msg: error.message });
   }
 
   proyecto.colaboradores.push(usuario._id);
   await proyecto.save();
-  res.json({ msg: "Colaborador agregado correctamente."})
+  res.json({ msg: "Colaborador agregado correctamente." });
 };
 
 const eliminarColaborador = async (req, res) => {};
