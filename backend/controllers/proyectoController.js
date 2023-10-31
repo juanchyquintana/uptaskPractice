@@ -90,18 +90,56 @@ const eliminarProyecto = async (req, res) => {
 };
 
 const buscarColaborador = async (req, res) => {
-  const { email } = req.body
-  const usuario = await User.findOne({email}).select('-confirmado -createdAt -password -token -updateAt -__v')
+  const { email } = req.body;
+  const usuario = await User.findOne({ email }).select(
+    "-confirmado -createdAt -password -token -updateAt -__v"
+  );
 
-  if(!usuario) {
-    const error = new Error('Usuario no encontrado')
-    return res.status(404).json({ msg: error.message })
+  if (!usuario) {
+    const error = new Error("Usuario no encontrado");
+    return res.status(404).json({ msg: error.message });
   }
 
   res.json(usuario);
 };
 
-const agregarColaborador = async (req, res) => {};
+const agregarColaborador = async (req, res) => {
+  const proyecto = await Proyecto.findById(req.params.id);
+
+  if (!proyecto) {
+    const error = new Error("Proyecto No Encontrado");
+    return res.status(404).json({ msg: error.message });
+  }
+
+  if (proyecto.creador.toString() !== req.usuario._id.toString()) {
+    const error = new Error("Acción no válida");
+    return res.status(404).json({ msg: error.message });
+  }
+
+  const { email } = req.body;
+  const usuario = await User.findOne({ email }).select(
+    "-confirmado -createdAt -password -token -updatedAt -__v"
+  );
+
+  if (!usuario) {
+    const error = new Error("Usuario no encontrado");
+    return res.status(404).json({ msg: error.message });
+  }
+
+  if(proyecto.creador.toString() === usuario._id.toString()) {
+    const error = new Error("El Creador del Proyecto no puede ser Colaborador");
+    return res.status(404).json({ msg: error.message });
+  }
+
+  if(proyecto.colaboradores.includes(usuario._id)) {
+    const error = new Error("El Usuario ya pertenece al proyecto");
+    return res.status(404).json({ msg: error.message });
+  }
+
+  proyecto.colaboradores.push(usuario._id);
+  await proyecto.save();
+  res.json({ msg: "Colaborador agregado correctamente."})
+};
 
 const eliminarColaborador = async (req, res) => {};
 
