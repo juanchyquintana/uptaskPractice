@@ -7,6 +7,7 @@ import Alerta from "../components/Alerta";
 import ModalFormularioTarea from "../components/ModalFormularioTarea";
 import ModalEliminarTarea from "../components/ModalEliminarTarea";
 import Colaborador from "../components/Colaborador";
+import ModalEliminarColaborador from "../components/ModalEliminarColaborador";
 
 const Proyecto = () => {
   const params = useParams();
@@ -23,7 +24,9 @@ const Proyecto = () => {
 
   const { msg } = alerta;
 
-  return (
+  return msg ? (
+    <Alerta alerta={alerta} />
+  ) : (
     <>
       <div className="flex justify-between">
         <h1 className="font-black text-4xl">{nombre}</h1>
@@ -107,12 +110,15 @@ const Proyecto = () => {
             <Colaborador key={colaborador._id} colaborador={colaborador} />
           ))
         ) : (
-          <p className="text-center my-5 p-10">No hay colaboradores en ese proyecto</p>
+          <p className="text-center my-5 p-10">
+            No hay colaboradores en ese proyecto
+          </p>
         )}
       </div>
 
       <ModalFormularioTarea />
       <ModalEliminarTarea />
+      <ModalEliminarColaborador />
     </>
   );
 };

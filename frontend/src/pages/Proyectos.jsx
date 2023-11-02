@@ -14,7 +14,7 @@ const Proyectos = () => {
             <PreviewProyecto key={proyecto._id} proyecto={proyecto} />
           ))
         ) : (
-          <p className="text-center text-gray-600 uppercase p-5"></p>
+          <p className="text-center text-gray-600 uppercase p-5">No tienes ningún proyecto. Por favor, crea tu primer proyecto.</p>
         )}
       </div>
     </>
