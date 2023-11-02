@@ -138,6 +138,7 @@ const ProyectoProvider = ({ children }) => {
 
       const { data } = await clienteAxios(`/proyectos/${id}`, config);
       setProyecto(data);
+      setAlerta({});
     } catch (error) {
       setAlerta({
         msg: error.response.data.msg,
@@ -347,6 +348,9 @@ const ProyectoProvider = ({ children }) => {
         error: false,
       });
       setColaborador({});
+      setTimeout(() => {
+        setAlerta({});
+      }, 3000);
     } catch (error) {
       setAlerta({
         msg: error.response.data.msg,
@@ -391,6 +395,39 @@ const ProyectoProvider = ({ children }) => {
       });
       setColaborador({});
       setModalEliminarColaborador(false);
+
+      setTimeout(() => {
+        setAlerta({});
+      }, 3000);
+    } catch (error) {
+      console.log(error.response);
+    }
+  };
+
+  const completarTarea = async (id) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      };
+
+      const { data } = await clienteAxios.post(
+        `/tareas/estado/${id}`, {}, config
+      );
+
+      const proyectoActualizado = { ...proyecto };
+      proyectoActualizado.tareas = proyectoActualizado.tareas.map(
+        tareaState => tareaState._id === data._id ? data : tareaState
+      );
+
+      setProyecto(proyectoActualizado);
+      setTarea({});
+      setAlerta({});
     } catch (error) {
       console.log(error.response);
     }
@@ -421,6 +458,7 @@ const ProyectoProvider = ({ children }) => {
         handleModalEliminarColaborador,
         modalEliminarColaborador,
         eliminarColaborador,
+        completarTarea,
       }}
     >
       {children}
