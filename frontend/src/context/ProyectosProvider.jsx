@@ -14,6 +14,8 @@ const ProyectoProvider = ({ children }) => {
   const [tarea, setTarea] = useState({});
   const [modalEliminarTarea, setModalEliminarTarea] = useState(false);
   const [colaborador, setColaborador] = useState({});
+  const [modalEliminarColaborador, setModalEliminarColaborador] =
+    useState(false);
 
   const navigate = useNavigate();
 
@@ -136,6 +138,7 @@ const ProyectoProvider = ({ children }) => {
 
       const { data } = await clienteAxios(`/proyectos/${id}`, config);
       setProyecto(data);
+      setAlerta({});
     } catch (error) {
       setAlerta({
         msg: error.response.data.msg,
@@ -343,15 +346,90 @@ const ProyectoProvider = ({ children }) => {
       setAlerta({
         msg: data.msg,
         error: false,
-      })
-      setColaborador({})
-      setAlerta({})
-
+      });
+      setColaborador({});
+      setTimeout(() => {
+        setAlerta({});
+      }, 3000);
     } catch (error) {
       setAlerta({
         msg: error.response.data.msg,
         error: true,
-      })
+      });
+    }
+  };
+
+  const handleModalEliminarColaborador = (colaborador) => {
+    setModalEliminarColaborador(!modalEliminarColaborador);
+    setColaborador(colaborador);
+  };
+
+  const eliminarColaborador = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      };
+
+      const { data } = await clienteAxios.post(
+        `/proyectos/eliminar-colaborador/${proyecto._id}`,
+        { id: colaborador._id },
+        config
+      );
+
+      const proyectoActualizado = { ...proyecto };
+      proyectoActualizado.colaboradores =
+        proyectoActualizado.colaboradores.filter(
+          (colaboradorState) => colaboradorState._id !== colaborador._id
+        );
+
+      setProyecto(proyectoActualizado);
+      setAlerta({
+        msg: data.msg,
+        error: false,
+      });
+      setColaborador({});
+      setModalEliminarColaborador(false);
+
+      setTimeout(() => {
+        setAlerta({});
+      }, 3000);
+    } catch (error) {
+      console.log(error.response);
+    }
+  };
+
+  const completarTarea = async (id) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      };
+
+      const { data } = await clienteAxios.post(
+        `/tareas/estado/${id}`, {}, config
+      );
+
+      const proyectoActualizado = { ...proyecto };
+      proyectoActualizado.tareas = proyectoActualizado.tareas.map(
+        tareaState => tareaState._id === data._id ? data : tareaState
+      );
+
+      setProyecto(proyectoActualizado);
+      setTarea({});
+      setAlerta({});
+    } catch (error) {
+      console.log(error.response);
     }
   };
 
@@ -377,6 +455,10 @@ const ProyectoProvider = ({ children }) => {
         submitColaborador,
         colaborador,
         agregarColaborador,
+        handleModalEliminarColaborador,
+        modalEliminarColaborador,
+        eliminarColaborador,
+        completarTarea,
       }}
     >
       {children}
