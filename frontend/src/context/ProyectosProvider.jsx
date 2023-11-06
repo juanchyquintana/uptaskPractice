@@ -16,6 +16,7 @@ const ProyectoProvider = ({ children }) => {
   const [colaborador, setColaborador] = useState({});
   const [modalEliminarColaborador, setModalEliminarColaborador] =
     useState(false);
+  const [buscador, setBuscador] = useState(false);
 
   const navigate = useNavigate();
 
@@ -140,10 +141,14 @@ const ProyectoProvider = ({ children }) => {
       setProyecto(data);
       setAlerta({});
     } catch (error) {
+      navigate("/proyectos");
       setAlerta({
         msg: error.response.data.msg,
         error: true,
       });
+      setTimeout(() => {
+        setAlerta({});
+      }, 3000);
     }
 
     setCargando(false);
@@ -417,12 +422,14 @@ const ProyectoProvider = ({ children }) => {
       };
 
       const { data } = await clienteAxios.post(
-        `/tareas/estado/${id}`, {}, config
+        `/tareas/estado/${id}`,
+        {},
+        config
       );
 
       const proyectoActualizado = { ...proyecto };
       proyectoActualizado.tareas = proyectoActualizado.tareas.map(
-        tareaState => tareaState._id === data._id ? data : tareaState
+        (tareaState) => (tareaState._id === data._id ? data : tareaState)
       );
 
       setProyecto(proyectoActualizado);
@@ -432,6 +439,10 @@ const ProyectoProvider = ({ children }) => {
       console.log(error.response);
     }
   };
+
+  const handleBuscador = () => {
+    setBuscador(!buscador)
+  }
 
   return (
     <ProyectosContext.Provider
@@ -459,6 +470,8 @@ const ProyectoProvider = ({ children }) => {
         modalEliminarColaborador,
         eliminarColaborador,
         completarTarea,
+        handleBuscador,
+        buscador
       }}
     >
       {children}
