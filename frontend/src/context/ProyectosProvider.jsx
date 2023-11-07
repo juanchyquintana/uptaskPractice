@@ -2,6 +2,9 @@
 import { useState, useEffect, createContext } from "react";
 import clienteAxios from "../config/clienteAxios";
 import { useNavigate } from "react-router-dom";
+import io from "socket.io-client";
+
+let socket;
 
 const ProyectosContext = createContext();
 
@@ -40,6 +43,10 @@ const ProyectoProvider = ({ children }) => {
       }
     };
     obtenerProyectos();
+  }, []);
+
+  useEffect(() => {
+    socket = io(import.meta.env.VITE_BACKEND_URL);
   }, []);
 
   const mostrarAlerta = (alerta) => {
@@ -203,7 +210,6 @@ const ProyectoProvider = ({ children }) => {
     try {
       const token = localStorage.getItem("token");
       if (!token) return;
-
       const config = {
         headers: {
           "Content-Type": "application/json",
@@ -212,12 +218,12 @@ const ProyectoProvider = ({ children }) => {
       };
 
       const { data } = await clienteAxios.post("/tareas", tarea, config);
-      // Agregar la tarea al State
-      const proyectoActualizado = { ...proyecto };
-      proyectoActualizado.tareas = [...proyecto.tareas, data];
-      setProyecto(proyectoActualizado);
+
       setAlerta({});
       setModalFormularioTarea(false);
+
+      // SOCKET IO
+      socket.emit("nueva tarea", data);
     } catch (error) {
       console.log(error);
     }
@@ -240,13 +246,12 @@ const ProyectoProvider = ({ children }) => {
         tarea,
         config
       );
-      const proyectoActualizado = { ...proyecto };
-      proyectoActualizado.tareas = proyectoActualizado.tareas.map(
-        (tareaState) => (tareaState._id === data._id ? data : tareaState)
-      );
-      setProyecto(proyectoActualizado);
+
       setAlerta({});
       setModalFormularioTarea(false);
+
+      // Socket
+      socket.emit('actualizar tarea', data)
     } catch (error) {
       console.log(error);
     }
@@ -283,13 +288,11 @@ const ProyectoProvider = ({ children }) => {
         error: true,
       });
 
-      const proyectoActualizado = { ...proyecto };
-      proyectoActualizado.tareas = proyectoActualizado.tareas.filter(
-        (tareaState) => tareaState._id !== tarea._id
-      );
-
-      setProyecto(proyectoActualizado);
       setModalEliminarTarea(false);
+
+      // Socket
+      socket.emit("eliminar tarea", tarea);
+
       setTarea({});
       setTimeout(() => {
         setAlerta({});
@@ -427,21 +430,52 @@ const ProyectoProvider = ({ children }) => {
         config
       );
 
-      const proyectoActualizado = { ...proyecto };
-      proyectoActualizado.tareas = proyectoActualizado.tareas.map(
-        (tareaState) => (tareaState._id === data._id ? data : tareaState)
-      );
-
-      setProyecto(proyectoActualizado);
       setTarea({});
       setAlerta({});
+
+      //Socket
+      socket.emit('cambiar estado', data)
     } catch (error) {
       console.log(error.response);
     }
   };
 
   const handleBuscador = () => {
-    setBuscador(!buscador)
+    setBuscador(!buscador);
+  };
+
+  //SOCKET IO
+
+  const submitTareasProyecto = (tarea) => {
+    // Agregar la tarea al State
+    const proyectoActualizado = { ...proyecto };
+    proyectoActualizado.tareas = [...proyectoActualizado.tareas, tarea];
+    setProyecto(proyectoActualizado);
+  };
+
+  const eliminarTareaProyecto = (tarea) => {
+    const proyectoActualizado = { ...proyecto };
+    proyectoActualizado.tareas = proyectoActualizado.tareas.filter(
+      (tareaState) => tareaState._id !== tarea._id
+    );
+
+    setProyecto(proyectoActualizado);
+  };
+
+  const actualizarTareaProyecto = tarea => {
+    const proyectoActualizado = { ...proyecto };
+    proyectoActualizado.tareas = proyectoActualizado.tareas.map(
+      (tareaState) => (tareaState._id === tarea._id ? tarea : tareaState)
+    );
+    setProyecto(proyectoActualizado);
+  }
+
+  const cambiarEstadoTarea = tarea => {
+    const proyectoActualizado = { ...proyecto };
+    proyectoActualizado.tareas = proyectoActualizado.tareas.map(
+      (tareaState) => (tareaState._id === tarea._id ? tarea : tareaState)
+    );
+    setProyecto(proyectoActualizado);
   }
 
   return (
@@ -471,7 +505,11 @@ const ProyectoProvider = ({ children }) => {
         eliminarColaborador,
         completarTarea,
         handleBuscador,
-        buscador
+        buscador,
+        submitTareasProyecto,
+        eliminarTareaProyecto,
+        actualizarTareaProyecto,
+        cambiarEstadoTarea
       }}
     >
       {children}

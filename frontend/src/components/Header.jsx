@@ -3,7 +3,7 @@ import useProyectos from "../hooks/useProyectos"
 import Busqueda from "./Buscador"
 
 const Header = () => {
-    const { handleBuscador, buscador } = useProyectos()
+    const { handleBuscador } = useProyectos()
   return (
     <header className="px-4 py-5 bg-white border-b">
         <div className="md:flex md:justify-between">
